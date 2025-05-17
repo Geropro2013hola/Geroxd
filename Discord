@@ -1,0 +1,49 @@
+import discord
+from discord.ext import commands
+import yt_dlp  
+import random  
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f'¡{bot.user} ha iniciado sesión!')
+
+@bot.command()
+async def mem(ctx):
+    with open('meme.png', 'rb') as f:
+        picture = discord.File(f)
+    await ctx.send(file=picture)
+
+@bot.command()
+async def hola(ctx):
+    await ctx.send("¡Hola! Soy un bot de Discord.")
+
+@bot.command()
+async def play(ctx, *, search: str):
+    ydl_opts = {
+        'quiet': True,  
+        'extract_flat': True,  
+        'force_generic_extractor': True  
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        try:
+            info_dict = ydl.extract_info(f'ytsearch:{search}', download=False)
+            if 'entries' in info_dict and info_dict['entries']:
+                video_url = info_dict['entries'][0]['url']
+                await ctx.send(f'Aquí está el video que encontré: {video_url}')
+            else:
+                await ctx.send("No encontré resultados para tu búsqueda.")
+        except Exception as e:
+            await ctx.send(f'Hubo un problema al buscar la canción: {e}')
+
+@bot.command()
+async def emoji(ctx):
+    emojis = ["😀", "😂", "😍", "😎", "🤖", "🎉", "🔥", "💀", "🐱", "🚀", "🌟", "💯", "🎵", "🤯"]
+    random_emoji = random.choice(emojis)
+    await ctx.send(random_emoji)
+
+bot.run("")
